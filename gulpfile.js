@@ -15,7 +15,7 @@ gulp.task('less', function () {
         .pipe(less({
             paths: [path.join(__dirname, 'less', 'includes')]
         }))
-        .pipe(gulp.dest('./src/public/stylesheets'));
+        .pipe(gulp.dest('./bin/public/stylesheets'));
 });
 
 
@@ -31,7 +31,7 @@ gulp.task('test', function () {
 gulp.task('browser-sync', ['nodemon', 'watch'], function () {
     browserSync.init(null, {
         proxy: "http://localhost:3000",
-        files: ["src/public/**/*.*", "src/views/**/*.*"],
+        files: ["bin/public/**/*.*", "bin/views/**/*.*"],
         browser: "google chrome",
         port: 7000,
     });
@@ -42,8 +42,8 @@ gulp.task('nodemon', function (cb) {
     var started = false;
 
     return nodemon({
-        script: 'src/www.js',
-        watch: ['src/*.js']
+        script: 'bin/www.js',
+        watch: ['bin/**/*.js']
     }).on('start', function () {
         if (!started) {
             cb();
@@ -61,9 +61,10 @@ gulp.task('nodemon', function (cb) {
 // TypeScript build for /src folder, pipes in .d.ts files from typings folder 
 var tsConfigSrc = tsb.create('src/tsconfig.json');
 gulp.task('build', function () {
+    gulp.copyDir('src/views/**/*', 'bin/views/');
     return gulp.src(['typings/**/*.ts', 'src/**/*.ts'])
         .pipe(tsConfigSrc()) 
-        .pipe(gulp.dest(''));
+        .pipe(gulp.dest('bin/'));
 });
 
 // TypeScript build for /tests folder, pipes in .d.ts files from typings folder
@@ -86,3 +87,8 @@ gulp.task('watch', function () {
 
 gulp.task('buildAll', ['build', 'buildTests', 'less']);
 gulp.task('default', ['browser-sync']);
+
+gulp.copyDir=function(src,dest){
+    return gulp.src(src)
+        .pipe(gulp.dest(dest));
+};
